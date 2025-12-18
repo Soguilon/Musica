@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glass Music Player</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(270deg, #ff5fa2, #7f5cff, #3bd9ff);
+  background-size: 600% 600%;
+  animation: gradientMove 12s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.player {
+  width: 90%;
+  max-width: 360px;
+  backdrop-filter: blur(20px) saturate(150%);
+  background: rgba(255,255,255,0.12);
+  border-radius: 24px;
+  padding: 22px;
+  text-align: center;
+  color: white;
+  box-shadow:
+    0 35px 60px rgba(0,0,0,0.5),
+    inset 0 0 0 1px rgba(255,255,255,0.2);
+}
+
+.cover {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.35);
+}
+
+.cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+h3 {
+  margin: 8px 0 6px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.time {
+  font-size: 13px;
+  opacity: 0.9;
+  margin-bottom: 10px;
+}
+
+input[type=range] {
+  width: 100%;
+  margin: 10px 0;
+  accent-color: #fff;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+
+.controls button {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.28);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.controls button:hover {
+  transform: scale(1.1);
+  background: rgba(255,255,255,0.45);
+}
+
+/* Lyrics button */
+#lyricsBtn {
+  margin-top: 10px;
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.28);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  color: white;
+  backdrop-filter: blur(10px);
+  font-weight: 600;
+}
+
+/* Lyrics modal/pop-up */
+#lyricsModal {
+  display: none;
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  width: 300px;
+  height: 300px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+  color: white;
+  border-radius: 16px;
+  padding: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.45);
+  cursor: move;
+  resize: both;
+}
+
+#lyricsContent {
+  height: 100%;
+  overflow-y: auto;
+  white-space: pre-line;
+  line-height: 1.6;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+  padding-right: 6px;
+}
+
+#closeLyrics {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #fff;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  text-align: center;
+  line-height: 22px;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<div class="player">
+  <div class="cover">
+    <img src="rap.png">
+  </div>
+
+  <h3 id="title">Tap Play</h3>
+  <div class="time" id="time">0:00 / 2:47</div>
+
+  <audio id="audio">
+    <source src="Mahal Kita Lagi.wav" type="audio/wav">
+  </audio>
+
+  <div class="controls">
+    <button id="playPause"><i class="fas fa-play"></i></button>
+  </div>
+
+  <input type="range" id="progress" min="0" max="100" value="0">
+  <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+
+  <button id="lyricsBtn">Click here for lyrics</button>
+</div>
+
+<!-- Lyrics modal -->
+<div id="lyricsModal">
+  <div id="closeLyrics">×</div>
+  <div id="lyricsContent">
+[Verse]
+Kahapon parang ulan, laging madilim
+Puso ko noon, parang walang bituin
+Ngunit dumating ka, biglang lumiwanag
+Para kang araw sa langit kong basag
+
+Ngiti mo parang alon, tuloy-tuloy sa dalampasigan
+Bawat tawa mo, para akong nahipan ng hangin
+Sa piling mo, parang wala nang problema
+Sa mundo ko, ikaw na ang sistema
+
+[Chorus]
+Mahal kita, lagi na lang
+Ikaw ang kulay sa buhay kong walang laman
+Tawa mo’y musika, sa puso ko’y kanta
+Mahal kita, lagi na lang
+
+[Verse 2]
+Mga plano ko noon, parang kalat na papel
+Pero ikaw ang lapis, binuo mo'ng model
+Di na kailangan ng GPS o mapa
+Ikaw ang direksyon, aking biyahe sa saya
+
+Kapag magkasama, lahat steady lang
+Di kailangan ng drama, chill lang, walang halang
+Ikaw ang sagot sa bawat tanong
+Ikaw ang tama sa mundong mali noon
+
+[Prechorus]
+Noon, takot akong magtiwala
+Ngunit ikaw, binura mo ang duda
+Ngayon, sigurado na ako
+Ikaw lang, wala nang iba pa dito
+
+Noon, takot akong magtiwala
+Ngunit ikaw, binura mo ang duda
+Ngayon, sigurado na ako
+Ikaw lang, wala nang iba pa dito
+
+[Chorus]
+Mahal kita, lagi na lang
+Ikaw ang kulay sa buhay kong walang laman
+Tawa mo’y musika, sa puso ko’y kanta
+Mahal kita, lagi na lang
+  </div>
+</div>
+
+<script>
+const audio = document.getElementById("audio");
+const playBtn = document.getElementById("playPause");
+const icon = playBtn.querySelector("i");
+const title = document.getElementById("title");
+const time = document.getElementById("time");
+const progress = document.getElementById("progress");
+const volume = document.getElementById("volume");
+const lyricsBtn = document.getElementById("lyricsBtn");
+const lyricsModal = document.getElementById("lyricsModal");
+const lyricsContent = document.getElementById("lyricsContent");
+const closeLyrics = document.getElementById("closeLyrics");
+
+const totalDuration = 167;
+const delay = 5;
+
+// Play/pause button
+playBtn.onclick = () => {
+  if (audio.paused) {
+    audio.play();
+    title.textContent = "Now Playing: Mahal Kita Lagi";
+    icon.classList.replace("fa-play", "fa-pause");
+  } else {
+    audio.pause();
+    icon.classList.replace("fa-pause", "fa-play");
+  }
+};
+
+// Progress slider
+audio.ontimeupdate = () => {
+  const current = audio.currentTime;
+  const min = Math.floor(current / 60);
+  const sec = Math.floor(current % 60).toString().padStart(2, "0");
+  time.textContent = `${min}:${sec} / 2:47`;
+
+  // Update progress bar
+  progress.value = (current / totalDuration) * 100;
+
+  // Scroll lyrics in modal
+  if (current >= delay) {
+    const adjustedTime = current - delay;
+    const adjustedDuration = totalDuration - delay;
+    const scrollPercent = adjustedTime / adjustedDuration;
+    const maxScroll = lyricsContent.scrollHeight - lyricsContent.clientHeight;
+    lyricsContent.scrollTop = maxScroll * scrollPercent;
+  }
+};
+
+progress.oninput = () => {
+  audio.currentTime = (progress.value / 100) * totalDuration;
+};
+
+// Volume slider
+volume.oninput = () => {
+  audio.volume = volume.value;
+};
+
+// Lyrics modal
+lyricsBtn.onclick = () => lyricsModal.style.display = "block";
+closeLyrics.onclick = () => lyricsModal.style.display = "none";
+
+// Make modal draggable
+let isDragging = false, offsetX, offsetY;
+
+lyricsModal.addEventListener('mousedown', e => {
+  if(e.target === closeLyrics) return; // don't drag if clicking close
+  isDragging = true;
+  offsetX = e.clientX - lyricsModal.offsetLeft;
+  offsetY = e.clientY - lyricsModal.offsetTop;
+});
+
+document.addEventListener('mouseup', () => isDragging = false);
+document.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  lyricsModal.style.left = (e.clientX - offsetX) + 'px';
+  lyricsModal.style.top = (e.clientY - offsetY) + 'px';
+});
+</script>
+</body>
+</html>
