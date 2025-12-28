@@ -3,254 +3,373 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Glass Music Player</title>
-
+<title>Music Carousel</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 <style>
-body {
-  margin: 0;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #1c1c1c, #3b3b6b, #ff5fa2);
-  background-size: 600% 600%;
-  animation: gradientMove 12s ease infinite;
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .galaxy {
+    position: fixed;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: radial-gradient(circle at 20% 20%, #6a0dad, transparent 70%),
+                radial-gradient(circle at 80% 30%, #1e90ff, transparent 70%),
+                radial-gradient(circle at 50% 70%, #ff1493, transparent 70%),
+                radial-gradient(circle at 70% 80%, #0a1a3f, transparent 70%);
+    animation: flow 120s linear infinite;
+    z-index: -3;
+  }
+
+  @keyframes flow {
+    0% { transform: translate(0,0); }
+    50% { transform: translate(15%, 15%); }
+    100% { transform: translate(0,0); }
+  }
+
+  .stars {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    pointer-events: none;
+  }
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: twinkle 3s infinite ease-in-out;
+    background: white;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  .player-wrapper {
+    width: fit-content;
+    margin: 80px auto 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .player-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 420px;
+    height: 520px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,0,255,0.2) 40%, rgba(0,255,255,0.1) 80%);
+    filter: blur(90px);
+    z-index: -1;
+    animation: glowWave 12s ease-in-out infinite alternate;
+  }
+
+  @keyframes glowWave {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    100% { transform: translate(-50%, -50%) scale(1.08); }
+  }
+
+  .player {
+    backdrop-filter: blur(25px) saturate(180%);
+    background: rgba(0,0,0,0.55);
+    border-radius: 28px;
+    padding: 25px;
+    text-align: center;
+    color: #fff;
+    border: 2px solid rgba(0, 255, 255, 0.6);
+    box-shadow: 0 20px 40px rgba(0,255,255,0.2),
+                0 0 30px rgba(255,0,255,0.2);
+    width: 360px;
+  }
+
+  .cover {
+    width: 100%;
+    aspect-ratio: 1/1;
+    border-radius: 22px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  h3 { margin: 10px 0; }
+
+  .time { font-size: 14px; margin-bottom: 12px; }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-bottom: 12px;
+  }
+  .controls button {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.5);
+    color: #0ff;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 0 12px #0ff, 0 0 20px #ff5fa2;
+  }
+
+  .slider-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0;
+  }
+
+  input[type=range] {
+    flex: 1;
+  }
+
+  /* 🎵 Lyrics */
+  .lyrics {
+    margin-top: 18px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 12px;
+    border-radius: 18px;
+    background: rgba(0,0,0,0.45);
+    box-shadow: inset 0 0 20px rgba(255,255,255,0.1);
+    scroll-behavior: smooth;
+  }
+
+  .lyric-line {
+    font-size: 15px;
+    line-height: 1.8;
+    opacity: 0.35;
+    transition: 0.4s;
+    margin: 6px 0;
+  }
+
+  .lyric-line.active {
+    opacity: 1;
+    color: #fff;
+    font-weight: 600;
+    text-shadow: 0 0 10px #0ff;
+  }
+
+/* 🌌 Custom Scrollbar – Galaxy Theme */
+.lyrics::-webkit-scrollbar {
+  width: 8px;
 }
 
-@keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.lyrics::-webkit-scrollbar-track {
+  background: rgba(10, 10, 30, 0.6);
+  border-radius: 20px;
+  box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.15);
 }
 
-.player {
-  width: 90%;
-  max-width: 360px;
-  backdrop-filter: blur(25px) saturate(180%);
-  background: rgba(0,0,0,0.4);
-  border-radius: 28px;
-  padding: 25px;
-  text-align: center;
-  color: #fff;
-  border: 2px solid rgba(0, 255, 255, 0.6);
+.lyrics::-webkit-scrollbar-thumb {
+  border-radius: 20px;
+  background: linear-gradient(
+    180deg,
+    #9b5cff,
+    #00ffff,
+    #ff5fa2
+  );
   box-shadow:
-    0 20px 40px rgba(0,255,255,0.2),
-    0 0 30px rgba(255,0,255,0.2),
-    inset 0 0 0 1px rgba(255,255,255,0.15);
-  transition: box-shadow 0.2s ease;
+    0 0 10px rgba(0, 255, 255, 0.6),
+    0 0 18px rgba(255, 95, 162, 0.6);
 }
 
-.cover {
-  width: 100%;
-  aspect-ratio: 1/1;
-  border-radius: 22px;
-  overflow: hidden;
-  margin-bottom: 18px;
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 25px rgba(0,0,0,0.5);
+.lyrics::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    #c77dff,
+    #5fffff,
+    #ff7ac8
+  );
+  box-shadow:
+    0 0 14px rgba(0, 255, 255, 0.9),
+    0 0 24px rgba(255, 95, 162, 0.9);
 }
 
-.cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 22px;
-}
-
-h3 {
-  margin: 10px 0 8px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-shadow: 0 1px 5px rgba(0,0,0,0.7);
-}
-
-.time {
-  font-size: 14px;
-  opacity: 0.95;
-  margin-bottom: 14px;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-}
-
-/* Controls */
-.controls {
-  display: flex;
-  justify-content: center;
-  gap: 18px;
-  margin-bottom: 14px;
-}
-
-.controls button {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(0,0,0,0.5);
-  color: #0ff;
-  font-size: 22px;
-  cursor: pointer;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 0 10px #0ff, 0 0 20px #ff5fa2;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, color 0.2s ease;
-}
-
-.controls button:hover {
-  transform: scale(1.15);
-  color: #ff5fa2;
-  box-shadow: 0 0 15px #0ff, 0 0 30px #ff5fa2;
-}
-
-/* Sliders container with icons */
-.slider-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 8px 0;
-}
-
-.slider-container i {
-  font-size: 18px;
-  color: #0ff;
-  text-shadow: 0 0 6px #0ff;
-}
-
-input[type=range] {
-  flex: 1;
-  -webkit-appearance: none;
-  background: rgba(255,255,255,0.1);
-  height: 6px;
-  border-radius: 12px;
-  outline: none;
-}
-
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #0ff;
-  cursor: pointer;
-  box-shadow: 0 0 10px #0ff, 0 0 6px #ff5fa2;
-  transition: transform 0.15s ease, background 0.2s ease;
-}
-
-input[type=range]::-webkit-slider-thumb:hover {
-  transform: scale(1.3);
-  background: #ff5fa2;
-}
-
-input[type=range]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #0ff;
-  cursor: pointer;
-  box-shadow: 0 0 10px #0ff, 0 0 6px #ff5fa2;
+/* Firefox support */
+.lyrics {
+  scrollbar-width: thin;
+  scrollbar-color: #7ffcff rgba(10, 10, 30, 0.6);
 }
 
 </style>
 </head>
 <body>
 
-<div class="player" id="player">
-  <div class="cover">
-    <img src="rap.png" alt="Album Cover">
-  </div>
+<div class="galaxy"></div>
+<div class="stars"></div>
 
-  <h3 id="title">Tap Play</h3>
-  <div class="time" id="time">0:00 / 2:47</div>
+<div class="player-wrapper">
+  <div class="player-glow"></div>
 
-  <audio id="audio">
-    <source src="Mahal Kita Lagi.wav" type="audio/wav">
-  </audio>
+  <div class="player" data-src="Tahimik Pero Tapat.mp3">
+    <div class="cover"><img src="01.png"></div>
+    <h3 class="title">Tahimik Pero Tapat</h3>
+    <div class="time">0:00 / 3:44</div>
+    <audio></audio>
 
-  <div class="controls">
-    <button id="playPause"><i class="fas fa-play"></i></button>
-  </div>
+    <div class="controls">
+      <button class="playPause"><i class="fas fa-play"></i></button>
+    </div>
 
-  <!-- Progress Slider -->
-  <div class="slider-container">
-    <i class="fas fa-backward"></i>
-    <input type="range" id="progress" min="0" max="100" value="0">
-    <i class="fas fa-forward"></i>
-  </div>
+    <div class="slider-container">
+      <input type="range" class="progress" min="0" max="100">
+    </div>
 
-  <!-- Volume Slider -->
-  <div class="slider-container">
-    <i class="fas fa-volume-low"></i>
-    <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
-    <i class="fas fa-volume-high"></i>
+    <div class="lyrics" id="lyrics"></div>
   </div>
 </div>
 
 <script>
-const audio = document.getElementById("audio");
-const playBtn = document.getElementById("playPause");
-const icon = playBtn.querySelector("i");
-const title = document.getElementById("title");
-const time = document.getElementById("time");
-const progress = document.getElementById("progress");
-const volume = document.getElementById("volume");
-const player = document.getElementById("player");
-
-const totalDuration = 167; // 2:47
-
-// Pulsing neon glow synced to music
-let pulseInterval;
-function startPulse() {
-  pulseInterval = setInterval(() => {
-    const intensity = 0.4 + Math.random()*0.15;
-    player.style.boxShadow = `
-      0 20px 40px rgba(0,255,255,${intensity}),
-      0 0 30px rgba(255,0,255,${intensity}),
-      inset 0 0 0 1px rgba(255,255,255,0.15)
-    `;
-  }, 100);
+const starsContainer = document.querySelector(".stars");
+for(let i=0;i<80;i++){
+  const s=document.createElement("div");
+  s.className="star";
+  s.style.top=Math.random()*100+"%";
+  s.style.left=Math.random()*100+"%";
+  s.style.width=s.style.height=(1+Math.random()*2)+"px";
+  starsContainer.appendChild(s);
 }
 
-function stopPulse() {
-  clearInterval(pulseInterval);
-  player.style.boxShadow = `
-    0 20px 40px rgba(0,255,255,0.2),
-    0 0 30px rgba(255,0,255,0.2),
-    inset 0 0 0 1px rgba(255,255,255,0.15)
-  `;
-}
+const audio=document.querySelector("audio");
+const playBtn=document.querySelector(".playPause i");
+const progress=document.querySelector(".progress");
+const timeEl=document.querySelector(".time");
+audio.src="Tahimik Pero Tapat.mp3";
 
-// Play/pause
-playBtn.onclick = () => {
-  if (audio.paused) {
+/* ⏱️ Lyrics timestamps (seconds) */
+const lyricsData = [
+  // Verse 1
+  [12, "Tahimik lang ako sa tabi mo"],
+  [16, "Di maingay Pero nandito"],
+  [19, "Hawak kamay sa bawat biyahe"],
+  [22, "Kahit traffic Di ka bibitaw e"],
+
+  [26, "Alala ko yung mga pangarap mo"],
+  [29, "Inuunti-unti Sinasabayan ko"],
+  [33, "I keep my words simple Totoo"],
+  [36, "Di kailangan sobrang bongga rito"],
+
+  // Pre-Chorus
+  [40, "Kung minsan nagdududa ka pa If I'm really staying"],
+  [47, "Pahinga ka sa dibdib ko"],
+  [51, "You know I’m all in, I’m all in"],
+
+  // Chorus
+  [54, "Pumasok ka sa puso ko"],
+  [55, "Dito ka lang"],
+  [56, "Dito sigurado"],
+  [58, "Di ako mawawala"],
+  [60, "Kahit bumagyo"],
+  [63, "Ikaw ang tahanan ko Oh-woah"],
+
+  [68, "’Di man ako magaling magsabi"],
+  [71, "Ramdam mo sana sa araw-araw baby"],
+  [74, "I’ll love you steady"],
+  [76, "Slow and true"],
+  [78, "Tahimik pero tapat sa’yo"],
+
+  // Verse 2
+  [94, "Di ako yung laging pa-surprise"],
+  [95, "Pero lagi kitang uunahin"],
+  [98, "No lies"],
+  [99, "Late night calls"],
+  [100, "Kahit pagod na"],
+  [101, "I’ll still listen habang nakahiga ka"],
+
+  [108, "Pag napapagod ka sa mundo"],
+  [111, "Sabihin mo lang"],
+  [112, "Sasalo ako"],
+  [113, "I’ll hold your fears"],
+  [115, "‘di ko pagtatawanan"],
+  [117, "Laging nandyan"],
+  [118, "Kahit di mo kailangan"],
+
+  // Pre-Chorus
+  [122, "Minsan natatakot ka pa rin"],
+  [126, "If my heart might wander"],
+  [128, "Pero tingnan mo sa mata ko"],
+  [131, "You’re the only one I’m under"],
+
+  // Bridge
+  [135, "Kung kulang sa salita"],
+  [137, "Bawi ako sa gawa"],
+  [139, "Every little coffee run"],
+  [141, "Every quiet 2 AM na usapan"],
+
+  [146, "I’m not perfect I know"],
+  [148, "Pero sa’yo lang ang puso ko"],
+  [152, "Dito lang"],
+  [153, "Di lalayo"],
+  [154, "Dahan-dahan pero sigurado"],
+
+  // Final Chorus
+  [163, "Pumasok ka sa puso ko"],
+  [164, "Dito ka lang"],
+  [165, "Dito sigurado"],
+  [166, "Di ako mawawala"],
+  [168, "Kahit bumagyo"],
+  [171, "Ikaw ang tahanan ko Oh-woah"],
+
+  [177, "’Di man ako magaling magsabi"],
+  [180, "Ramdam mo sana sa araw-araw baby"],
+  [183, "I’ll love you steady"],
+  [184, "Slow and true"],
+  [186, "Tahimik pero tapat sa’yo"]
+];
+
+
+const lyricsEl=document.getElementById("lyrics");
+lyricsData.forEach(l=>{
+  const div=document.createElement("div");
+  div.className="lyric-line";
+  div.textContent=l[1];
+  lyricsEl.appendChild(div);
+});
+
+const lines=[...document.querySelectorAll(".lyric-line")];
+
+audio.addEventListener("timeupdate",()=>{
+  progress.value=(audio.currentTime/audio.duration)*100;
+  const m=Math.floor(audio.currentTime/60);
+  const s=Math.floor(audio.currentTime%60).toString().padStart(2,"0");
+  timeEl.textContent=`${m}:${s} / 3:44`;
+
+  lyricsData.forEach((l,i)=>{
+    if(audio.currentTime>=l[0]){
+      lines.forEach(x=>x.classList.remove("active"));
+      lines[i].classList.add("active");
+      lines[i].scrollIntoView({block:"center",behavior:"smooth"});
+    }
+  });
+});
+
+progress.oninput=()=>audio.currentTime=(progress.value/100)*audio.duration;
+
+document.querySelector(".playPause").onclick=()=>{
+  if(audio.paused){
     audio.play();
-    title.textContent = "Now Playing: Mahal Kita Lagi";
-    icon.classList.replace("fa-play", "fa-pause");
-    startPulse();
-  } else {
+    playBtn.className="fas fa-pause";
+  }else{
     audio.pause();
-    icon.classList.replace("fa-pause", "fa-play");
-    stopPulse();
+    playBtn.className="fas fa-play";
   }
 };
-
-// Update time & progress
-audio.ontimeupdate = () => {
-  const current = audio.currentTime;
-  const min = Math.floor(current / 60);
-  const sec = Math.floor(current % 60).toString().padStart(2,"0");
-  time.textContent = `${min}:${sec} / 2:47`;
-  progress.value = (current / totalDuration) * 100;
-};
-
-// Progress slider
-progress.oninput = () => {
-  audio.currentTime = (progress.value / 100) * totalDuration;
-};
-
-// Volume slider
-volume.oninput = () => {
-  audio.volume = volume.value;
-};
 </script>
+
 </body>
 </html>
